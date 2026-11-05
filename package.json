@@ -1,0 +1,23 @@
+{
+  "name": "beglo",
+  "version": "1.0.0",
+  "description": "Бегло — быстрое чтение книг по одному слову",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "build:preview": "PREVIEW=1 vite build",
+    "test": "node --test test/*.test.js"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "vite": "^6.4.5",
+    "vite-plugin-pwa": "^2.0.0",
+    "vite-plugin-singlefile": "^2.3.4"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/pt-serif": "^5.3.0"
+  },
+  "private": true,
+  "type": "module"
+}
