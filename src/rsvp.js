@@ -17,15 +17,16 @@ export function letterCount(word) {
   return m ? m.length : 0;
 }
 
-// Текст → список слов. Последнее слово абзаца помечено p: true.
+// Абзацы → список слов. Последнее слово абзаца помечено p: true.
 // Длинные слова с дефисом (больше 12 букв) делятся на части.
-export function tokenize(text) {
+// starts[i] — номер первого слова i-го абзаца (для глав).
+export function tokenizeParagraphs(paragraphs) {
   const tokens = [];
-  const paragraphs = String(text)
-    .split(/\r?\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-  for (const para of paragraphs) {
+  const starts = [];
+  for (const raw of paragraphs) {
+    starts.push(tokens.length);
+    const para = String(raw).trim();
+    if (!para) continue;
     const start = tokens.length;
     for (const word of para.split(/\s+/)) {
       if (!word) continue;
@@ -40,7 +41,26 @@ export function tokenize(text) {
     }
     if (tokens.length > start) tokens[tokens.length - 1].p = true;
   }
-  return tokens;
+  return { tokens, starts };
+}
+
+export function tokenize(text) {
+  return tokenizeParagraphs(String(text).split(/\r?\n/)).tokens;
+}
+
+// Номер главы, в которой стоит слово index. chapterStarts отсортированы.
+export function chapterAt(chapterStarts, index) {
+  let lo = 0;
+  let hi = chapterStarts.length - 1;
+  let found = -1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (chapterStarts[mid] <= index) {
+      found = mid;
+      lo = mid + 1;
+    } else hi = mid - 1;
+  }
+  return found;
 }
 
 // Номер опорной буквы среди букв слова: примерно треть слова от начала.

@@ -1,7 +1,7 @@
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { tokenize, splitWord, delayFor, clampWpm, formatMinutes, Reader, RAMP_WORDS } from '../src/rsvp.js';
-import { DEMO_BOOK } from '../src/demo.js';
+import { readFileSync } from 'node:fs';
+import { tokenize, tokenizeParagraphs, chapterAt, splitWord, delayFor, clampWpm, formatMinutes, Reader, RAMP_WORDS } from '../src/rsvp.js';
 
 test('опорная буква: примерно треть слова от начала', () => {
   assert.deepEqual(splitWord('Бегло'), { left: 'Б', mid: 'е', right: 'гло' });
@@ -52,10 +52,16 @@ test('оставшееся время по-русски', () => {
   assert.equal(formatMinutes(120), '2 ч');
 });
 
-test('отрывок разбирается без пустых слов', () => {
-  const tokens = tokenize(DEMO_BOOK.text);
-  assert.ok(tokens.length > 150);
+test('классика разбирается без пустых слов, главы встают на свои места', () => {
+  const book = JSON.parse(readFileSync(new URL('../public/classics/kapitanskaya-dochka.json', import.meta.url)));
+  const { tokens, starts } = tokenizeParagraphs(book.paragraphs);
+  assert.ok(tokens.length > 25000);
   assert.ok(tokens.every((t) => t.t.length > 0));
+  const chapterStarts = book.chapters.map((c) => starts[c.para]);
+  assert.equal(tokens[chapterStarts[0]].t, 'ГЛАВА');
+  assert.equal(chapterAt(chapterStarts, 0), -1);
+  assert.equal(chapterAt(chapterStarts, chapterStarts[1]), 1);
+  assert.equal(chapterAt(chapterStarts, tokens.length - 1), chapterStarts.length - 1);
 });
 
 test('чтение идёт по словам, разгоняется и останавливается в конце', () => {

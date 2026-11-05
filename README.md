@@ -13,9 +13,11 @@
 ## Устройство
 
 - `src/rsvp.js` — деление текста на слова, опорная буква, паузы, таймер чтения
-- `src/main.js` — экраны «Библиотека» и «Чтение»
-- `src/storage.js` — настройки и место чтения на телефоне
-- `src/demo.js` — встроенный отрывок (А. С. Пушкин, общественное достояние)
+- `src/parsers.js` — разбор FB2 (в том числе в zip), EPUB без защиты и TXT
+- `src/books.js`, `src/db.js` — каталог книг, хранение на телефоне (IndexedDB)
+- `src/screens/` — экраны «Библиотека», «Чтение», «Скорость»
+- `src/storage.js` — настройки и место чтения
+- `public/classics/` — полка классики; собирается `node scripts/build_classics.mjs <папка Texts>` из корпуса [19th Century Russian Literature](https://github.com/kaylinland/19thCenturyRussianLiterature) (тексты lib.ru, общественное достояние); комментарии издателей вырезаны
 - `scripts/make_icons.py` — рисует иконки из шрифта PT Serif
 
 Шрифты PT Serif и Inter встроены в приложение (лицензия SIL Open Font License).
