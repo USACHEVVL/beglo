@@ -75,6 +75,15 @@ function parseXml(text, DP, mime = 'application/xml') {
   return doc && doc.documentElement ? doc : null;
 }
 
+// Строка, похожая на заголовок главы: «Глава 2», «Часть первая», «IV», «12.».
+const CHAPTER_RE = /^(глава|часть|книга|пролог|эпилог|предисловие|послесловие|chapter|part)(?=$|[\s.:]).{0,60}$|^[IVXLC]{1,7}\.?$|^\d{1,3}\.?$/i;
+const ROMAN_OR_NUMBER_RE = /^([IVXLC]{1,7}|\d{1,3})\.?$/i;
+
+function sameText(a, b) {
+  const norm = (x) => String(x || '').toLowerCase().replace(/ё/g, 'е').replace(/[^0-9a-zа-я]+/g, '');
+  return Boolean(norm(a)) && norm(a) === norm(b);
+}
+
 function local(el) {
   return (el.localName || el.nodeName || '').toLowerCase().replace(/^.*:/, '');
 }
@@ -186,10 +195,18 @@ export function parseFb2(bytes, DP) {
           .filter(Boolean);
         const heading = parts.join('. ').replace(/\.\./g, '.');
         if (heading) {
-          if (depth > 0) addChapter(chapters, heading, paragraphs.length);
+          // Заголовок, повторяющий название книги (рассказ в одном разделе), — не глава.
+          if (depth > 0 && !sameText(heading, title)) addChapter(chapters, heading, paragraphs.length);
           push(heading);
         }
-      } else if (['p', 'v', 'subtitle', 'text-author'].includes(name)) {
+      } else if (name === 'subtitle') {
+        // Часто главы помечены подзаголовком: <subtitle>II</subtitle> или «Глава 2».
+        const text = cleanText(textOf(child, isFb2NoteLink));
+        if (text && CHAPTER_RE.test(text) && text.length < 70) {
+          addChapter(chapters, ROMAN_OR_NUMBER_RE.test(text) ? `Глава ${text.replace(/\.$/, '')}` : text, paragraphs.length);
+        }
+        push(text);
+      } else if (['p', 'v', 'text-author'].includes(name)) {
         push(textOf(child, isFb2NoteLink));
       } else if (['section', 'epigraph', 'poem', 'stanza', 'cite'].includes(name)) {
         walk(child, name === 'section' ? depth + 1 : depth);
@@ -324,7 +341,6 @@ export function parseEpub(entries, DP) {
 
 /* ---------- TXT ---------- */
 
-const CHAPTER_RE = /^(глава|часть|книга|пролог|эпилог|предисловие|послесловие|chapter|part)(?=$|[\s.:]).{0,60}$|^[IVXLC]{1,7}\.?$|^\d{1,3}\.?$/i;
 
 export function parseTxt(bytes) {
   const text = decodeText(bytes);
