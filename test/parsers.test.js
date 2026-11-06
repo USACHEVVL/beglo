@@ -116,3 +116,23 @@ test('кодировки и заголовки', () => {
   assert.equal(prettyTitle('IV'), 'IV');
   assert.equal(prettyTitle('Обычный заголовок'), 'Обычный заголовок');
 });
+
+test('FB2: главы-подзаголовки (<subtitle>II</subtitle>), раздел с названием книги — не глава', () => {
+  const fb2 = `<?xml version="1.0" encoding="utf-8"?>
+<FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0">
+<description><title-info><author><first-name>Антон</first-name><last-name>Чехов</last-name></author><book-title>Дама с собачкой</book-title></title-info></description>
+<body><title><empty-line/></title>
+<section><title><p>Дама с собачкой</p></title>
+<subtitle>I</subtitle><p>Говорили, что на набережной появилось новое лицо.</p>
+<subtitle>II.</subtitle><p>Прошла неделя после знакомства.</p>
+<subtitle>* * *</subtitle><p>Звёздочки — не глава.</p>
+<cite><text-author>1899</text-author></cite>
+</section></body></FictionBook>`;
+  const book = parse(new TextEncoder().encode(fb2), 'dama.fb2');
+  assert.deepEqual(book.chapters, [
+    { title: 'Глава I', para: 1 },
+    { title: 'Глава II', para: 3 },
+  ]);
+  assert.equal(book.paragraphs[0], 'Дама с собачкой');
+  assert.equal(book.paragraphs.at(-1), '1899');
+});
