@@ -63,6 +63,15 @@ export function chapterAt(chapterStarts, index) {
   return found;
 }
 
+// Какую главу показывать в шапке. До первой главы обычно идёт только название книги
+// в несколько слов — тогда сразу показываем первую главу, чтобы шапка не «молчала».
+export const LEAD_IN_WORDS = 30;
+export function headerChapter(chapterStarts, index) {
+  const c = chapterAt(chapterStarts, index);
+  if (c === -1 && chapterStarts.length && chapterStarts[0] <= LEAD_IN_WORDS) return 0;
+  return c;
+}
+
 // Номер опорной буквы среди букв слова: примерно треть слова от начала.
 export function orpLetterIndex(letters) {
   if (letters <= 1) return 0;

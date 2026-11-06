@@ -1,7 +1,7 @@
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { tokenize, tokenizeParagraphs, chapterAt, splitWord, delayFor, clampWpm, formatMinutes, Reader, RAMP_WORDS } from '../src/rsvp.js';
+import { tokenize, tokenizeParagraphs, chapterAt, headerChapter, splitWord, delayFor, clampWpm, formatMinutes, Reader, RAMP_WORDS } from '../src/rsvp.js';
 
 test('опорная буква: примерно треть слова от начала', () => {
   assert.deepEqual(splitWord('Бегло'), { left: 'Б', mid: 'е', right: 'гло' });
@@ -97,4 +97,12 @@ test('перемотка не выходит за границы', () => {
   assert.equal(r.i, 0);
   r.step(10);
   assert.equal(r.i, 4);
+});
+
+test('шапка: короткое вступление до первой главы показывает первую главу', () => {
+  assert.equal(headerChapter([3, 400], 0), 0);
+  assert.equal(headerChapter([3, 400], 2), 0);
+  assert.equal(headerChapter([3, 400], 500), 1);
+  assert.equal(headerChapter([200, 400], 0), -1);
+  assert.equal(headerChapter([], 0), -1);
 });
