@@ -1,6 +1,6 @@
 import { ICONS, esc, percent } from '../ui.js';
 import { loadSettings, saveSettings, loadProgress, saveProgress, load } from '../storage.js';
-import { splitWord, Reader, formatMinutes, minutesLeft, chapterAt, MIN_WPM, MAX_WPM, WPM_STEP } from '../rsvp.js';
+import { splitWord, Reader, formatMinutes, minutesLeft, headerChapter, MIN_WPM, MAX_WPM, WPM_STEP } from '../rsvp.js';
 import { findBook, prepareBook, markOpened, BookError } from '../books.js';
 
 export function renderReading(app, ctx, bookId) {
@@ -95,7 +95,7 @@ export function renderReading(app, ctx, bookId) {
     };
 
     const showChapter = () => {
-      const c = chapterAt(chapterStarts, reader.i);
+      const c = headerChapter(chapterStarts, reader.i);
       if (c === lastChapter) return;
       lastChapter = c;
       els.chapter.textContent = c >= 0 ? chapters[c].title : book.author || 'Свой файл';
